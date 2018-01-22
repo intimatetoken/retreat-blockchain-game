@@ -8,36 +8,79 @@ contract GameController {
     address account;
     uint amount;
     string bet;           // 'heads' or 'tails'
+    uint timestamp;
   }
+
+  enum GameStatus {Open, Closed, Upcoming}
 
   struct Game {
-    address game;         // game address
-    uint startsAt;
+    address ringer;           // person, running the game
+    address contractAddress;    // Contract where the game exists
+    string result;              // 'heads' or 'tails'
+    uint expiryBlock;           // The block number this game will expire on
+
+    GameStatus status;
+
     uint pool;            // total prize money in the pool
-    string status;        // 'open', 'closed', 'upcoming'
-    string result;        // 'heads' or 'tails'
-    // [] of bets Bet { address, amount, bet}
-    uint numBets;
-    mapping (uint => Bet) bets;
+
+    Bet[] bets;
   }
 
-  uint numGames;
-  mapping (uint => Game) games;
+  Game[] public games; // All games
 
   // http://solidity.readthedocs.io/en/develop/types.html#structs
+  // https://github.com/dob/auctionhouse/blob/master/contracts/AuctionHouse.sol
 
-  // Create a new Game
-  function newGame(address beneficiary, uint startsAt) public returns (uint gameID) {
-      gameID = numGames++; // gameID is return variable
-      // Creates new struct and saves in storage. We leave out the mapping type.
-      games[gameID] = Game({
-        game: beneficiary,
-        startsAt: startsAt,
-        pool: 0,
-        status: "open",
-        result: "",
-        numBets: 0
-      });
+  modifier onlyOpen(uint gameID) {
+    Game storage g = games[gameID];
+    if (g.status != GameStatus.Open) {
+      throw;
+    }
+    // Game should not be over
+    if (block.number >= g.expiryBlock) {
+      throw;
+    }
+    _;
+  }
+
+  // modifier onlyOwner {
+  //   if (owner != msg.sender) throw;
+  //   _;
+  // }
+
+
+  // Events
+  event GameCreated(uint gameID);
+  event BidsClosed();
+  event GameStarted();
+
+  event LogFailure(string message);
+
+
+  // Create new Game, then activate the game
+  function newGame(
+                  address beneficiary,
+                  uint _deadline,   // in blocknumber
+                  uint startsAt) public returns (uint gameID) {
+    // Creates a new game
+    gameID = games.length++;
+    Game storage g = games[gameID];
+    g.game = beneficiary;
+    g.pool = 0;
+    g.status = GameStatus.Upcoming;
+    g.numBets = 0;
+
+    // Check to see if the game is being created from a trusted party
+
+    // Check to see if the game deadline is in the future
+    if (block.number >= _deadline) {
+      LogFailure("Block number is not in the future");
+      throw;
+    }
+
+    GameCreated(gameID);
+
+    return gameID;
   }
 
   // TODO
@@ -45,7 +88,7 @@ contract GameController {
   // TODO
   // Work out how we can get the users bet of "heads" or "tails"
   // Force them to include it in their description ?
-  function placeBet(uint gameID) public payable {
+  function placeBet(uint gameID) public payable onlyOpen(gameID) returns (bool success) {
       Game storage g = games[gameID];
       // Creates a new temporary memory struct, initialised with the given values
       // and copies it over to storage.
