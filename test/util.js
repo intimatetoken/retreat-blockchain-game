@@ -37,5 +37,27 @@ exports.getTransaction = async function (txn) {
 exports.getEthBalance = async function (addr) {
   let wei = await bluebird.promisify(web3.eth.getBalance)(addr)
 
-  return web3.fromWei(wei, 'ether').toNumber()
+  return web3.fromWei(wei).toNumber()
+}
+
+/**
+ * Executes a callback and returns the difference of the
+ * address's balance in wei
+ *
+ * @param {*} address
+ * @param {*} callback
+ */
+exports.diffAfterTransaction = async function(address, callback) {
+  let start = await exports.getBalance(address)
+
+  let txn = await callback()
+
+  let gas = txn.receipt.gasUsed
+  let gasPrice = (await exports.getTransaction(txn.tx)).gasPrice
+  let fee = gasPrice.mul(gas)
+
+  let after = await exports.getBalance(address)
+  let diff = after.sub(start).add(fee)
+
+  return { diff, txn }
 }

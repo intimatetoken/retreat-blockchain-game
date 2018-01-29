@@ -4,13 +4,15 @@ import 'zeppelin-solidity/contracts/lifecycle/Destructible.sol';
 import 'zeppelin-solidity/contracts/math/SafeMath.sol';
 
 contract Throw is Destructible {
-  using SafeMath for uint256;
+  using SafeMath for uint;
+
+  event Log(string msg, uint value);
 
   enum Status { NotThrown, Heads, Tails }
 
   struct Header {
     address owner;
-    uint256 amount;
+    uint amount;
   }
 
   struct Bet {
@@ -22,7 +24,8 @@ contract Throw is Destructible {
   Bet[] public bets;
   Header[] public headers;
   Status public status;
-  uint256 public commission = 10;
+  uint public commission = 10;
+  mapping(address => uint256) public balances;
 
   function headEmUp() public payable {
     headers.push(Header({
@@ -31,7 +34,7 @@ contract Throw is Destructible {
     }));
   }
 
-  function illTakeYa(uint256 idx) public payable {
+  function illTakeYa(uint idx) public payable {
     bets.push(Bet({
       heads: headers[idx].owner,
       tails: msg.sender,
@@ -46,8 +49,24 @@ contract Throw is Destructible {
       status = Status.Tails;
     }
 
-    // let fee =
-    owner.transfer(2000000000000000000);
+    uint take = 0;
+
+    for (uint i = 0; i < bets.length; ++i) {
+      uint winnings = bets[i].amount.mul(2);
+      uint fee = commission.mul(winnings).div(100);
+
+      take = take.add(fee);
+      winnings = winnings.sub(fee);
+
+      if (status == Status.Heads) {
+        balances[bets[i].heads] = winnings;
+      } else {
+        balances[bets[i].tails] = winnings;
+      }
+    }
+
+    // Transfer
+    owner.transfer(fee);
   }
 
   // function getHeaders() returns (uint256[]) {
@@ -56,6 +75,12 @@ contract Throw is Destructible {
 
   function getRandom(uint max) internal constant returns (uint randomNumber) {
     return (uint(keccak256(block.blockhash(block.number - 1))) % max) + 1;
+  }
+
+  function withdraw() public {
+    uint amount = balances[msg.sender];
+    balances[msg.sender] = 0;
+    msg.sender.transfer(amount);
   }
 
   function getHeadersCount() public constant returns (uint256) {
