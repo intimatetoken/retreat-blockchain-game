@@ -2,12 +2,15 @@
   "private": true,
   "main": "src/index.js",
   "scripts": {
+    "compile": "truffle compile",
     "dev": "poi",
     "build": "poi build",
     "test": "truffle test --network test",
     "watch": "poi watch"
   },
   "dependencies": {
+    "eth-random": "^0.0.4-alpha.1",
+    "moment": "^2.20.1",
     "truffle-contract": "^3.0.2",
     "vue": "^2.5.3",
     "vue-router": "^2.8.1",
@@ -17,7 +20,10 @@
     "zeppelin-solidity": "^1.6.0"
   },
   "devDependencies": {
+    "chai": "^4.1.2",
+    "chai-bignumber": "^2.0.2",
     "ganache-cli": "^6.0.3",
-    "poi": "^9.6.13"
+    "poi": "^9.6.13",
+    "truffle": "^4.0.5"
   }
 }
