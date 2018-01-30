@@ -3,7 +3,6 @@ pragma solidity 0.4.18;
 import 'zeppelin-solidity/contracts/lifecycle/Destructible.sol';
 import 'zeppelin-solidity/contracts/math/SafeMath.sol';
 
-
 contract Throw is Destructible {
   using SafeMath for uint;
 
@@ -24,18 +23,28 @@ contract Throw is Destructible {
 
   Bet[] public bets;
   Header[] public headers;
-  Status public status;
+  Status public status = Status.NotThrown;
   uint public commission = 10;
   mapping(address => uint256) public balances;
 
-  function headEmUp() public payable {
+  modifier notThrown() {
+    require(status == Status.NotThrown);
+    _;
+  }
+
+  modifier thrown() {
+    require(status == Status.Heads || status == Status.Tails);
+    _;
+  }
+
+  function headEmUp() public payable notThrown {
     headers.push(Header({
       owner: msg.sender,
       amount: msg.value
     }));
   }
 
-  function illTakeYa(uint idx) public payable {
+  function illTakeYa(uint idx) public payable notThrown {
     bets.push(Bet({
       heads: headers[idx].owner,
       tails: msg.sender,
@@ -43,7 +52,7 @@ contract Throw is Destructible {
     }));
   }
 
-  function throwIt() public {
+  function throwIt() public notThrown {
     if (getRandom(10) % 2 == 1) {
       status = Status.Heads;
     } else {
@@ -78,7 +87,7 @@ contract Throw is Destructible {
     return (uint(keccak256(block.blockhash(block.number - 1))) % max) + 1;
   }
 
-  function withdraw() public {
+  function withdraw() public thrown {
     uint amount = balances[msg.sender];
     balances[msg.sender] = 0;
     msg.sender.transfer(amount);
@@ -92,7 +101,7 @@ contract Throw is Destructible {
     return bets.length;
   }
 
-  function updateCommission(uint256 _commission) public {
+  function updateCommission(uint256 _commission) public notThrown {
       require(_commission > 0);
 
       commission = _commission;
