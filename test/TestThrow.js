@@ -28,11 +28,13 @@ contract('Throw', accounts => {
   let owner = accounts[0]
   let header = accounts[1]
   let tailer = accounts[2]
+  let throwTime
   let winner
 
   before(async () => {
+    throwTime = moment().add(1, 'hour')
     let spinner = await Spinner.deployed()
-    let txn = await spinner.spin()
+    let txn = await spinner.spin(throwTime.unix())
 
     flip = await Throw.at(txn.logs[1].args.where)
     helper = await TestHelper.deployed()
@@ -92,6 +94,7 @@ contract('Throw', accounts => {
 
   it('can throw', async () => {
     // Arrange.
+    await util.setTime(helper, throwTime)
     await flip.updateCommission(10)
 
     // Act.
@@ -120,16 +123,6 @@ contract('Throw', accounts => {
   })
 
   it('winner can take their winnings', async () => {
-    // Act.
-    let { diff, txn } = await util.diffAfterTransaction(winner, () => flip.withdraw({ from: winner }))
-
-    // Assert.
-    expect(web3.fromWei(diff)).to.be.bignumber.equal(18)
-    expect(await util.getEthBalance(flip.address)).to.be.bignumber.equal(0)
-  })
-
-  // ie. we have enough gas/wei
-  it('winnings can be claimed', async () => {
     // Act.
     let { diff, txn } = await util.diffAfterTransaction(winner, () => flip.withdraw({ from: winner }))
 

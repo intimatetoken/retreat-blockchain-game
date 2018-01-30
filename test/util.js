@@ -1,25 +1,27 @@
 const bluebird = require('bluebird')
 const moment = require('moment')
 
-web3.increaseTime = function (seconds, callback = () => {}) {
-  web3.currentProvider.sendAsync({
-    jsonrpc: "2.0",
-    method: "evm_increaseTime",
-    params: [seconds],
-    id: new Date().getTime()
-  }, callback)
+exports.increaseTime = async function (seconds) {
+  return new Promise((resolve, reject) => {
+    web3.currentProvider.sendAsync({
+      jsonrpc: "2.0",
+      method: "evm_increaseTime",
+      params: [seconds],
+      id: Date.now()
+    }, (err, res) => err ? reject(err) : resolve(res))
+  })
 }
 
-exports.setTime = async function (_dateTime) {
+exports.setTime = async function (helper, _dateTime) {
   let dateTime = moment.isMoment(_dateTime) ? _dateTime : moment(_dateTime)
   let currentTime = moment.unix(await helper.getNow.call())
 
-  let diff = (dateTime - currentTime) / 1000
+  let diff = dateTime.diff(currentTime, 'seconds');
 
   if ( diff < 0 ) throw new Error('Impossible to go back in time with the chain')
 
-  web3.increaseTime(diff)
-  await helper.noop() // force mine a block to set the time
+  await exports.increaseTime(diff)
+  await helper.noop()
 }
 
 exports.getBalance = async function (addr) {

@@ -23,9 +23,10 @@ contract Throw is Destructible {
 
   Bet[] public bets;
   Header[] public headers;
+  uint public throwTime;
   Status public status = Status.NotThrown;
   uint public commission = 10;
-  mapping(address => uint256) public balances;
+  mapping(address => uint) public balances;
 
   modifier notThrown() {
     require(status == Status.NotThrown);
@@ -37,14 +38,35 @@ contract Throw is Destructible {
     _;
   }
 
-  function headEmUp() public payable notThrown {
+  modifier beforeThrow() {
+    require(throwTime > now);
+    _;
+  }
+
+  modifier afterThrow() {
+    require(throwTime <= now);
+    _;
+  }
+
+  function Throw(uint _throwTime) public {
+    require(_throwTime > now);
+
+    throwTime = _throwTime;
+  }
+
+  function headEmUp() public payable notThrown beforeThrow {
     headers.push(Header({
       owner: msg.sender,
       amount: msg.value
     }));
   }
 
-  function illTakeYa(uint idx) public payable notThrown {
+  // Fallback function makes a heads bet
+  function () external payable {
+    headEmUp();
+  }
+
+  function illTakeYa(uint idx) public payable notThrown beforeThrow {
     bets.push(Bet({
       heads: headers[idx].owner,
       tails: msg.sender,
@@ -52,7 +74,7 @@ contract Throw is Destructible {
     }));
   }
 
-  function throwIt() public notThrown {
+  function throwIt() public notThrown afterThrow {
     if (getRandom(10) % 2 == 1) {
       status = Status.Heads;
     } else {
