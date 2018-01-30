@@ -3,6 +3,7 @@ pragma solidity 0.4.18;
 import 'zeppelin-solidity/contracts/lifecycle/Destructible.sol';
 import 'zeppelin-solidity/contracts/math/SafeMath.sol';
 
+
 contract Throw is Destructible {
   using SafeMath for uint;
 
@@ -85,6 +86,10 @@ contract Throw is Destructible {
 
   function getHeadersCount() public constant returns (uint256) {
     return headers.length;
+  }
+
+  function getBetsCount() public constant returns (uint256) {
+    return bets.length;
   }
 
   function updateCommission(uint256 _commission) public {
