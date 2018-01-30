@@ -1,5 +1,6 @@
-const util = require('./util')
-const mapper = require('./mapper')
+const util = require('./helpers/util')
+const mapper = require('./helpers/mapper')
+const expectThrow = require('./helpers/expectThrow')
 
 const moment = require('moment')
 const chai = require('chai')
@@ -10,7 +11,6 @@ const Throw = artifacts.require('./Throw.sol')
 const Spinner = artifacts.require('./Spinner.sol')
 const TestHelper = artifacts.require('./TestHelper.sol')
 
-const expectThrow = require('./helpers/expectThrow')
 
 
 function ether (n) {
@@ -44,6 +44,9 @@ contract('Throw', accounts => {
     console.log(`Throw Deployed at ${flip.address}`)
     console.log('The current time is ', moment.unix(await helper.getNow.call()).format("dddd, MMMM Do YYYY, h:mm:ss a"))
   });
+
+  // there needs to be min one bet in order for a toss to be made.
+
 
   // it('cannot place a bet before', async () => {
   //   // Act.
@@ -109,29 +112,45 @@ contract('Throw', accounts => {
     expect(await util.getEthBalance(flip.address)).to.be.bignumber.equal(18)
   })
 
+  it('throw is in a valid status', async () => {
+    let validStates = ['Heads', 'Tails']
+    let status = mapper.toStatus(await flip.status.call())
+    expect(validStates.indexOf(status)).to.be.greaterThan(-1);
+  })
+
   // exceptions
-  it('should not be able to make a bet once coin has flipped', async () => {
-    await expectThrow(flip.illTakeYa(0, { from: tailer, value: web3.toWei(10) }));
+  it('should not be able to make a bet once coins have been tossed', async () => {
+    await flip.illTakeYa(0, { from: tailer, value: web3.toWei(10) })
+      .catch(err => {
+        assert(err.toString().includes('revert'), err.toString())
+      })
   })
 
-  it('should not be able to make a bet once throw has been made', async () => {
-    await expectThrow(flip.illTakeYa(0, { from: tailer, value: web3.toWei(10) }));
-  })
+  // it('should not be able to match a bet twice', async () => {
+  //   await expectThrow(flip.illTakeYa(0, { from: tailer, value: web3.toWei(10) }));
+  // })
 
-  it('should not be able to match a bet twice', async () => {
-    await expectThrow(flip.illTakeYa(0, { from: tailer, value: web3.toWei(10) }));
-  })
+  // it('winner can take their winnings', async () => {
+  //   // Act.
+  //   let { diff, txn } = await util.diffAfterTransaction(winner, () => flip.withdraw({ from: winner }))
 
-  it('winner can take their winnings', async () => {
-    // Act.
-    let { diff, txn } = await util.diffAfterTransaction(winner, () => flip.withdraw({ from: winner }))
-
-    // Assert.
-    expect(web3.fromWei(diff)).to.be.bignumber.equal(18)
-    expect(await util.getEthBalance(flip.address)).to.be.bignumber.equal(0)
-  })
+  //   // Assert.
+  //   expect(web3.fromWei(diff)).to.be.bignumber.equal(18)
+  //   expect(await util.getEthBalance(flip.address)).to.be.bignumber.equal(0)
+  // })
 
   it('winnings are distributed correctly', async () => {})
+  // // ie. we have enough gas/wei
+  // it('winnings can be claimed', async () => {
+  //   // Act.
+  //   let { diff, txn } = await util.diffAfterTransaction(winner, () => flip.withdraw({ from: winner }))
+
+  //   // Assert.
+  //   expect(web3.fromWei(diff)).to.be.bignumber.equal(18)
+  //   expect(await util.getEthBalance(flip.address)).to.be.bignumber.equal(0)
+  // })
+
+  // it('winnings are distributed correctly', async () => {})
 
 
 });
