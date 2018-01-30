@@ -7,6 +7,7 @@ chai.use(require('chai-bignumber')())
 const expect = chai.expect
 
 const Throw = artifacts.require('./Throw.sol')
+const Spinner = artifacts.require('./Spinner.sol')
 const TestHelper = artifacts.require('./TestHelper.sol')
 
 contract('Throw', accounts => {
@@ -19,7 +20,10 @@ contract('Throw', accounts => {
   let winner
 
   before(async () => {
-    flip = await Throw.deployed()
+    let spinner = await Spinner.deployed()
+    let txn = await spinner.spin()
+
+    flip = await Throw.at(txn.logs[1].args.where)
     helper = await TestHelper.deployed()
   })
 
