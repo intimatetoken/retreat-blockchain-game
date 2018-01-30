@@ -48,6 +48,10 @@ contract Throw is Destructible {
     _;
   }
 
+  /*****
+   * @dev Create the contract
+   * @param _throwTime   uint When a throw will take place (timestamp)
+   */
   function Throw(uint _throwTime) public {
     require(_throwTime > now);
 
@@ -117,6 +121,9 @@ contract Throw is Destructible {
 
   function getHeadersCount() public constant returns (uint256) {
     return headers.length;
+  }
+  function getThrowTime() public constant returns (uint) {
+    return throwTime;
   }
 
   function getBetsCount() public constant returns (uint256) {
