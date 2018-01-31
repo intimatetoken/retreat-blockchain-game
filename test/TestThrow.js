@@ -17,6 +17,19 @@ function ether (n) {
   return new web3.BigNumber(web3.toWei(n, 'ether'))
 }
 
+/**
+ * expect the callback to thow a "revert" exception
+ */
+function expectRevert (callback) {
+  return callback()
+    .then(() => {
+      assert.fail('should have reverted')
+    })
+    .catch(err => {
+      assert(err.toString().includes('revert'), err.toString())
+    })
+}
+
 const MIN_BET_SIZE = ether(0.01)
 contract('Throw', accounts => {
   // contract instances
@@ -28,16 +41,16 @@ contract('Throw', accounts => {
   let throwTime
   let winner
 
+  // Ensure contracts are all deployed
   before(async () => {
-
-    // Round up the spinner
+    blockHelper = await TestBlockHelper.deployed()
     let spinner = await Spinner.deployed()
+
     // setup throw
     throwTime = moment().add(1, 'hour')
     let txn = await spinner.spin(throwTime.unix())
+    // address of the toss contract
     flip = await Throw.at(txn.logs[1].args.where)
-
-    blockHelper = await TestBlockHelper.deployed()
   })
 
   it('should have been deployed', async () => {
@@ -46,10 +59,13 @@ contract('Throw', accounts => {
     console.log('Coins will be tossed at ', moment.unix(await flip.getThrowTime.call()).format("dddd, MMMM Do YYYY, h:mm:ss a"))
   });
 
-  // there needs to be min one bet in order for a toss to be made.
+  // Validation
+  it('min one bet in order for a toss to be made', async () => {
+    expect(await flip.getBetsCount()).to.be.bignumber.equal(0)
+    expectRevert(flip.throwIt)
+  })
 
-
-  it('cannot place a bet before', async () => {
+  it('can place a bet on heads', async () => {
     // Act.
     let txn = await flip.headEmUp({ from: header, value: web3.toWei(10) })
 
@@ -62,96 +78,117 @@ contract('Throw', accounts => {
     expect(await util.getEthBalance(header)).to.be.bignumber.lessThan(90)
   })
 
-  // it('can place a bet on heads', async () => {
-  //   // Act.
-  //   let txn = await flip.headEmUp({ from: header, value: web3.toWei(10) })
+  it('can match a bet with tails', async () => {
+    // Act.
+    let txn = await flip.illTakeYa(0, { from: tailer, value: web3.toWei(10) })
 
-  //   // Assert.
-  //   let maker = mapper.toHeader(await flip.headers.call(0))
+    // Assert.
+    let bet = mapper.toBet(await flip.bets.call(0))
 
-  //   expect(maker.owner).to.equal(header)
-  //   expect(web3.fromWei(maker.amount)).to.be.bignumber.equal(10)
-  //   expect(await util.getEthBalance(flip.address)).to.be.bignumber.equal(10)
-  //   expect(await util.getEthBalance(header)).to.be.bignumber.lessThan(90)
-  // })
+    expect(bet.header).to.equal(header)
+    expect(bet.tailer).to.equal(tailer)
+    expect(web3.fromWei(bet.amount)).to.be.bignumber.equal(10)
+    expect(await util.getEthBalance(flip.address)).to.be.bignumber.equal(20)
+    expect(await util.getEthBalance(tailer)).to.be.bignumber.lessThan(90)
+  })
 
-  // it('can match a bet with tails', async () => {
-  //   // Act.
-  //   let txn = await flip.illTakeYa(0, { from: tailer, value: web3.toWei(10) })
+  it('betCount should be 1', async () => {
+    let betCount = await flip.getBetsCount()
+    expect(betCount).to.be.bignumber.equal(1)
+  })
 
-  //   // Assert.
-  //   let bet = mapper.toBet(await flip.bets.call(0))
+  it.skip('unmatched bets are refunded', async () => {})
 
-  //   expect(bet.header).to.equal(header)
-  //   expect(bet.tailer).to.equal(tailer)
-  //   expect(web3.fromWei(bet.amount)).to.be.bignumber.equal(10)
-  //   expect(await util.getEthBalance(flip.address)).to.be.bignumber.equal(20)
-  //   expect(await util.getEthBalance(tailer)).to.be.bignumber.lessThan(90)
-  // })
+  it.skip('Cannot throw before throw time', async () => {})
 
-  // it('{n} bets should be 1', async () => {
-  //   let betCount = await flip.getBetsCount()
-  //   expect(betCount).to.be.bignumber.equal(1)
-  // })
+  it('can throw after throw time', async () => {
+    // Arrange.
+    await util.setTime(blockHelper, throwTime)
+    await flip.updateCommission(10)
 
-  // it('unnatched bets are refunded', async () => {})
+    // Act.
+    let { diff, txn } = await util.diffAfterTransaction(owner, flip.throwIt)
 
-  // it('can throw', async () => {
-  //   // Arrange.
-  //   await util.setTime(blockHelper, throwTime)
-  //   await flip.updateCommission(10)
+    // Assert.
+    let result = mapper.toStatus(await flip.status.call())
+    winner = 'Heads' === result ? header : tailer
 
-  //   // Act.
-  //   let { diff, txn } = await util.diffAfterTransaction(owner, flip.throwIt)
+    expect(web3.fromWei(diff)).to.be.bignumber.equal(2) // 10% of 20 ETH
+    expect(web3.fromWei(await flip.balances.call(winner))).to.be.bignumber.equal(18)
+    expect(await util.getEthBalance(flip.address)).to.be.bignumber.equal(18)
+  })
 
-  //   // Assert.
-  //   let result = mapper.toStatus(await flip.status.call())
-  //   winner = 'Heads' === result ? header : tailer
+  it('after throw has a valid status', async () => {
+    let validStates = ['Heads', 'Tails']
+    let status = mapper.toStatus(await flip.status.call())
+    expect(validStates.indexOf(status)).to.be.greaterThan(-1);
+  })
 
-  //   expect(web3.fromWei(diff)).to.be.bignumber.equal(2) // 10% of 20 ETH
-  //   expect(web3.fromWei(await flip.balances.call(winner))).to.be.bignumber.equal(18)
-  //   expect(await util.getEthBalance(flip.address)).to.be.bignumber.equal(18)
-  // })
+  // exceptions
+  it.skip('should not be able to make a bet once coins have been tossed', async () => {
+    assert.fail('should have reverted')
+  })
+  it.skip('should not be able to match a bet once coins have been tossed', async () => {
+    assert.fail('should have reverted')
+  })
 
-  // it('throw is in a valid status', async () => {
-  //   let validStates = ['Heads', 'Tails']
-  //   let status = mapper.toStatus(await flip.status.call())
-  //   expect(validStates.indexOf(status)).to.be.greaterThan(-1);
-  // })
+  it.skip('should not be able to make a bet after throwTime', async () => {
+    assert.fail('should have reverted')
+  })
+  it.skip('should not be able to match a bet after throwTime', async () => {
+    assert.fail('should have reverted')
+  })
 
-  // // exceptions
-  // it('should not be able to make a bet once coins have been tossed', async () => {
-  //   await flip.illTakeYa(0, { from: tailer, value: web3.toWei(10) })
-  //     .catch(err => {
-  //       assert(err.toString().includes('revert'), err.toString())
-  //     })
-  // })
+  it('should not be able to match the same (heads) bet twice', async () => {
+    let txn = await flip.illTakeYa(0, { from: tailer, value: web3.toWei(10) })
+      .then(() => {
+        assert.fail('should have reverted')
+      })
+      .catch(err => {
+        assert(err.toString().includes('revert'), err.toString())
+      })
+  })
 
-  // // it('should not be able to match a bet twice', async () => {
-  // //   await expectThrow(flip.illTakeYa(0, { from: tailer, value: web3.toWei(10) }));
-  // // })
+  it('winner/s can withdraw() their winnings', async () => {
+    // Act.
+    let { diff, txn } = await util.diffAfterTransaction(winner, () => flip.withdraw({ from: winner }))
 
-  // // it('winner can take their winnings', async () => {
-  // //   // Act.
-  // //   let { diff, txn } = await util.diffAfterTransaction(winner, () => flip.withdraw({ from: winner }))
+    // Assert.
+    expect(web3.fromWei(diff)).to.be.bignumber.equal(18)
+    expect(await util.getEthBalance(flip.address)).to.be.bignumber.equal(0)
+  })
 
-  // //   // Assert.
-  // //   expect(web3.fromWei(diff)).to.be.bignumber.equal(18)
-  // //   expect(await util.getEthBalance(flip.address)).to.be.bignumber.equal(0)
-  // // })
+  it.skip('boxer (comission) is paid correctly', async () => {})
 
-  // it('winnings are distributed correctly', async () => {})
-  // // ie. we have enough gas/wei
-  // it('winnings can be claimed', async () => {
-  //   // Act.
-  //   let { diff, txn } = await util.diffAfterTransaction(winner, () => flip.withdraw({ from: winner }))
+  it.skip('winnings can be claimed', async () => {
+    assert.fail('should have reverted')
+    // // Act.
+    // let { diff, txn } = await util.diffAfterTransaction(winner, () => flip.withdraw({ from: winner }))
 
-  //   // Assert.
-  //   expect(web3.fromWei(diff)).to.be.bignumber.equal(18)
-  //   expect(await util.getEthBalance(flip.address)).to.be.bignumber.equal(0)
-  // })
+    // // Assert.
+    // expect(web3.fromWei(diff)).to.be.bignumber.equal(18)
+    // expect(await util.getEthBalance(flip.address)).to.be.bignumber.equal(0)
+  })
 
-  // it('winnings are distributed correctly', async () => {})
+  it.skip('winnings can be claimed', async () => {
+    assert.fail('TODO - flip.claimWinnings()')
+    // // Act.
+    // let { diff, txn } = await util.diffAfterTransaction(winner, () => flip.withdraw({ from: winner }))
+
+    // // Assert.
+    // expect(web3.fromWei(diff)).to.be.bignumber.equal(18)
+    // expect(await util.getEthBalance(flip.address)).to.be.bignumber.equal(0)
+  })
+
+  it.skip('can add gas to the contract', async () => {
+    assert.fail('TODO - flip.claimWinnings()')
+    // // Act.
+    // let { diff, txn } = await util.diffAfterTransaction(winner, () => flip.withdraw({ from: winner }))
+
+    // // Assert.
+    // expect(web3.fromWei(diff)).to.be.bignumber.equal(18)
+    // expect(await util.getEthBalance(flip.address)).to.be.bignumber.equal(0)
+  })
 
 
 });
