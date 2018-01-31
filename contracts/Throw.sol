@@ -113,7 +113,7 @@ contract Throw is Destructible {
     return (uint(keccak256(block.blockhash(block.number - 1))) % max) + 1;
   }
 
-  function withdraw() public thrown {
+  function claim() public thrown payable {
     uint amount = balances[msg.sender];
     balances[msg.sender] = 0;
     msg.sender.transfer(amount);

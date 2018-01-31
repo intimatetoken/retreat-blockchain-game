@@ -152,7 +152,7 @@ contract('Throw', accounts => {
   // Claiming
   it('Winners can claim() their winnings', async () => {
     // Act.
-    let { diff, txn } = await util.diffAfterTransaction(winner, () => flip.withdraw({ from: winner }))
+    let { diff, txn } = await util.diffAfterTransaction(winner, () => flip.claim({ from: winner }))
 
     // Assert.
     expect(web3.fromWei(diff)).to.be.bignumber.equal(18)
