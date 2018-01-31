@@ -20,9 +20,6 @@ contract('TestSpinnerThrows', accounts => {
   let tailer = accounts[2]
 
   let throwTime = moment()
-  let winner
-
-  //
   let throwsCount = (24 * 60) / 15 // 1 throw every 15min for 24 hrs
 
   before(async () => {
@@ -30,6 +27,7 @@ contract('TestSpinnerThrows', accounts => {
     spinner = await Spinner.deployed()
   })
 
+  // setup 96 games at 15min intervals
   for (let index = 0; index < throwsCount; index++) {
 
     it(`toss#${index} throwTime is correct`, async () => {
