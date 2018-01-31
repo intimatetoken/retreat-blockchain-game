@@ -149,7 +149,8 @@ contract('Throw', accounts => {
       })
   })
 
-  it('winner/s can withdraw() their winnings', async () => {
+  // Claiming
+  it('Winners can claim() their winnings', async () => {
     // Act.
     let { diff, txn } = await util.diffAfterTransaction(winner, () => flip.withdraw({ from: winner }))
 
@@ -158,37 +159,10 @@ contract('Throw', accounts => {
     expect(await util.getEthBalance(flip.address)).to.be.bignumber.equal(0)
   })
 
+  it.skip('ONLY winners can claim their winnings', async () => {})
   it.skip('boxer (comission) is paid correctly', async () => {})
-
-  it.skip('winnings can be claimed', async () => {
-    assert.fail('should have reverted')
-    // // Act.
-    // let { diff, txn } = await util.diffAfterTransaction(winner, () => flip.withdraw({ from: winner }))
-
-    // // Assert.
-    // expect(web3.fromWei(diff)).to.be.bignumber.equal(18)
-    // expect(await util.getEthBalance(flip.address)).to.be.bignumber.equal(0)
-  })
-
-  it.skip('winnings can be claimed', async () => {
-    assert.fail('TODO - flip.claimWinnings()')
-    // // Act.
-    // let { diff, txn } = await util.diffAfterTransaction(winner, () => flip.withdraw({ from: winner }))
-
-    // // Assert.
-    // expect(web3.fromWei(diff)).to.be.bignumber.equal(18)
-    // expect(await util.getEthBalance(flip.address)).to.be.bignumber.equal(0)
-  })
-
-  it.skip('can add gas to the contract', async () => {
-    assert.fail('TODO - flip.claimWinnings()')
-    // // Act.
-    // let { diff, txn } = await util.diffAfterTransaction(winner, () => flip.withdraw({ from: winner }))
-
-    // // Assert.
-    // expect(web3.fromWei(diff)).to.be.bignumber.equal(18)
-    // expect(await util.getEthBalance(flip.address)).to.be.bignumber.equal(0)
-  })
+  it.skip('unclaimed winnings are refunded after 24hrs', async () => {})
+  it.skip('owner can add gas to the contract', async () => {})
 
 
 });
