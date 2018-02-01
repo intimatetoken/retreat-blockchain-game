@@ -1,6 +1,44 @@
 const bluebird = require('bluebird')
 const moment = require('moment')
 
+const Toss = artifacts.require('./Throw.sol')
+
+/**
+ * @param {Contract\Instance} Spinner A deployed instance of Spinner.sol
+ * @param {json} fixtures
+ *
+ * @return {Contract\Instance} Throw
+ */
+module.exports.setupToss = async (spinner, fixture) => {
+  let throwTime = fixture.throwTime
+  // setup throw
+  throwTime.add(15, 'minutes')
+  console.log('Setting thowTime to : ', throwTime.format("dddd, MMMM Do YYYY, h:mm:ss a"))
+  let txn = await spinner.spin(throwTime.unix())
+  // address of the toss contract
+  let toss = await Toss.at(txn.logs[1].args.where)
+  console.log(`Toss is deployed at : ${toss.address}`)
+  return toss
+}
+
+// place all matched bets
+module.exports.placeMatchedBets = async (toss, fixture) => {
+  for (let index = 0; index < fixture.matchedBets; index++) {
+    console.log(`[${index}:heads] ${fixture.heads[index].amount}`)
+    await toss.headEmUp({
+      from: fixture.heads[index].address,
+      value: fixture.heads[index].amount
+    })
+    console.log(`[${index}:tails] ${fixture.tails[index].amount}`)
+    await toss.illTakeYa(index, {
+      from: fixture.tails[index].address,
+      value: fixture.tails[index].amount
+    })
+  }
+
+  return toss
+}
+
 exports.increaseTime = async function (seconds) {
   return new Promise((resolve, reject) => {
     web3.currentProvider.sendAsync({

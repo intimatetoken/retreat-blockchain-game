@@ -78,6 +78,9 @@ contract('Throw', accounts => {
     expect(await util.getEthBalance(header)).to.be.bignumber.lessThan(90)
   })
 
+  it.skip('should return index of header bet', async () => {})
+  it.skip('matched bet amount should match', async () => {})
+
   it('can match a bet with tails', async () => {
     // Act.
     let txn = await flip.illTakeYa(0, { from: tailer, value: web3.toWei(10) })
@@ -97,7 +100,6 @@ contract('Throw', accounts => {
     expect(betCount).to.be.bignumber.equal(1)
   })
 
-  it.skip('unmatched bets are refunded', async () => {})
 
   it.skip('Cannot throw before throw time', async () => {})
 

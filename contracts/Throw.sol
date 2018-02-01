@@ -58,6 +58,7 @@ contract Throw is Destructible {
     throwTime = _throwTime;
   }
 
+  // TODO - Should return the uint idx of the HeaderBet
   function headEmUp() public payable notThrown beforeThrow {
     headers.push(Header({
       owner: msg.sender,
