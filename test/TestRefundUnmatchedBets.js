@@ -112,7 +112,7 @@ contract('TestSpinnerThrows', accounts => {
       }
 
       let currentBalance = await util.getEthBalance(winner.address)
-      let winnings = web3.fromWei(winner.amount * 2)
+      let winnings = web3.fromWei(winner.amount).toNumber()
       let expectedBalance = parseInt(winner.intialBalance) + parseInt(winnings)
 
       // todo fees etc
