@@ -82,10 +82,10 @@ export default {
 }
 
 import { mapState, mapActions } from 'vuex'
-import { ACTION_TYPES } from '../util/constants'
-import Profile from './sections/Profile'
-import ProfileForm from './sections/ProfileForm'
-import Web3Message from './sections/Web3Message'
+import { ACTION_TYPES } from './util/constants'
+import Profile from './components/sections/Profile'
+import ProfileForm from './components/sections/ProfileForm'
+import Web3Message from './components/sections/Web3Message'
 </script>
 
 <style>
