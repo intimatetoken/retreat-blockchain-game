@@ -76,7 +76,6 @@ exports.getTransaction = async function (txn) {
 
 exports.getEthBalance = async function (addr) {
   let wei = await bluebird.promisify(web3.eth.getBalance)(addr)
-
   return web3.fromWei(wei).toNumber()
 }
 
