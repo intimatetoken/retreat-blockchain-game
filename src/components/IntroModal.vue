@@ -1,6 +1,6 @@
 <script>
   import StatusItem from './StatusItem'
-  import { mapGetters } from 'vuex'
+  import { mapState } from 'vuex'
 
   export default {
     components: {
@@ -8,7 +8,29 @@
     },
 
     computed: {
-      ...mapGetters(['hasWeb3'])
+      ...mapState([
+        'web3',
+        'network',
+        'accounts',
+        'balance',
+        'throws'
+      ]),
+
+      networked () {
+        return this.network === null ? null : this.network == process.env.NETWORK_ID
+      },
+
+      isGood () {
+        let tests = [
+          this.web3,
+          this.accounts,
+          this.networked,
+          this.balance,
+          this.throws
+        ]
+
+        return tests.every(item => item)
+      }
     }
   }
 </script>
@@ -22,15 +44,15 @@
       </header>
       <section class="modal-card-body">
         <div class="content">
-          <status-item :status="hasWeb3" text="Web3 Injected Browser" instructions="Get a Web3 Enabled browser like MetaMask" />
-          <li>Wallet Unlocked</li>
-          <li>On the right network</li>
-          <li>Syncing with the blockchain</li>
-          <li>Schooey of Carlton Draught</li>
+          <status-item :status="web3" text="Web3 Injected Browser" instructions="Get a Web3 Enabled browser like MetaMask" />
+          <status-item :status="accounts" text="Wallet Unlocked" instructions="Unlock your wallet" />
+          <status-item :status="networked" text="On the right network" instructions="Select the Ropsten network" />
+          <status-item :status="balance" text="Got some eth for a bet" instructions="You're broke! Put some ETH in your wallet!" />
+          <status-item :status="throws" text="Syncing with the blockchain" instructions="Eeep! Try and refresh." />
         </div>
       </section>
       <footer class="modal-card-foot">
-        <button class="button is-success">Continue</button>
+        <button :disabled="! isGood" class="button is-success">Continue</button>
       </footer>
     </div>
   </div>
