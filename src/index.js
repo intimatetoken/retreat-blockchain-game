@@ -3,6 +3,8 @@ import App from './App'
 import router from './router'
 import store from './store'
 
+import './index.scss'
+
 new Vue({
   el: '#app',
   router,
