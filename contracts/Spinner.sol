@@ -9,6 +9,7 @@ contract Spinner is Ownable {
 
   function spin(uint throwTime) public {
     Throw toss = new Throw(throwTime);
+
     toss.transferOwnership(msg.sender);
 
     Tossed(address(toss));

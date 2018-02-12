@@ -49,6 +49,7 @@ contract('Throw', accounts => {
     // setup throw
     throwTime = moment().add(1, 'hour')
     let txn = await spinner.spin(throwTime.unix())
+
     // address of the toss contract
     flip = await Throw.at(txn.logs[1].args.where)
   })

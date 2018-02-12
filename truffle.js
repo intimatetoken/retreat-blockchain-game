@@ -8,14 +8,15 @@ module.exports = {
       network_id: "*",
       gas: 4600000
     },
-    // test: {
-    //   // host: "localhost",
-    //   // port: 7545,
-    //   network_id: "*",
-    // },
     test: {
+      host: "localhost",
+      port: 7545,
       network_id: "*",
-      provider: ganache.provider()
-    }
+      gas: 4600000
+    },
+    // test: {
+    //   network_id: "*",
+    //   provider: ganache.provider()
+    // }
   }
 };
