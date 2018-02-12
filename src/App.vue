@@ -27,7 +27,7 @@ export default {
   <div id="app">
     <IntroModal />
     <HeaderTemplate />
-    <router-view />
+    <router-view></router-view>
     <FooterTemplate />
   </div>
 </template>

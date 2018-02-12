@@ -5,7 +5,8 @@ module.exports = {
     development: {
       host: "localhost",
       port: 7545,
-      network_id: "*"
+      network_id: "*",
+      gas: 4600000
     },
     // test: {
     //   // host: "localhost",

@@ -7,6 +7,12 @@
       StatusItem
     },
 
+    data() {
+      return {
+        open: true
+      }
+    },
+
     computed: {
       ...mapState([
         'web3',
@@ -36,7 +42,7 @@
 </script>
 
 <template>
-  <div class="modal is-active">
+  <div class="modal" :class="{ 'is-active': open }">
     <div class="modal-background"></div>
     <div class="modal-card">
       <header class="modal-card-head">
@@ -52,7 +58,7 @@
         </div>
       </section>
       <footer class="modal-card-foot">
-        <button :disabled="! isGood" class="button is-success">Continue</button>
+        <button :disabled="! isGood" class="button is-success" @click="open = false">Continue</button>
       </footer>
     </div>
   </div>
