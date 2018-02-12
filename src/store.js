@@ -108,7 +108,6 @@ const store = new Vuex.Store({
           toBlock: 'latest'
         })
 
-        console.log(events)
         commit('throws', events)
 
         // for (i=0; i<events.length; i++) {

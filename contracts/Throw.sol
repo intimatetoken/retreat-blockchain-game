@@ -1,4 +1,4 @@
-pragma solidity 0.4.18;
+pragma solidity 0.4.19;
 
 import 'zeppelin-solidity/contracts/lifecycle/Destructible.sol';
 import 'zeppelin-solidity/contracts/math/SafeMath.sol';
@@ -6,7 +6,9 @@ import 'zeppelin-solidity/contracts/math/SafeMath.sol';
 contract Throw is Destructible {
   using SafeMath for uint;
 
-  event Log(string msg, uint value);
+  event Log(string msg);
+  event HeaderBet(uint idx, uint value);
+  event MatchedBet(uint idx);
 
   enum Status { NotThrown, Heads, Tails }
 
@@ -64,6 +66,8 @@ contract Throw is Destructible {
       owner: msg.sender,
       amount: msg.value
     }));
+
+    HeaderBet(headers.length - 1, msg.value);
   }
 
   // Fallback function makes a heads bet
@@ -77,6 +81,10 @@ contract Throw is Destructible {
       tails: msg.sender,
       amount: msg.value
     }));
+
+    delete headers[idx];
+
+    MatchedBet(idx);
   }
 
   function throwIt() public notThrown afterThrow {
@@ -114,7 +122,7 @@ contract Throw is Destructible {
     return (uint(keccak256(block.blockhash(block.number - 1))) % max) + 1;
   }
 
-  function claim() public thrown payable {
+  function claim() public {
     uint amount = balances[msg.sender];
     balances[msg.sender] = 0;
     msg.sender.transfer(amount);

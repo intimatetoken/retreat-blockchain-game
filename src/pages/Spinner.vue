@@ -3,27 +3,33 @@
 import moment from 'moment'
 import { mapState } from 'vuex'
 
+import Throw from '../components/SpinnerThrow'
 import SpinnerContract from '../../build/contracts/Spinner.json'
+import HelperContract from '../../build/contracts/TestHelper.json'
 
 export default {
+  components: {
+    Throw
+  },
+
   data() {
     return {
-      when: moment().format(moment.HTML5_FMT.DATETIME_LOCAL),
+      when: moment().add(1, 'hour').format(moment.HTML5_FMT.DATETIME_LOCAL),
       loading: false,
-      error: null
+      error: null,
+      success: false
     }
   },
 
   methods: {
     async add() {
       this.loading = true
+      this.error = null
+      this.success = false
 
       let time = moment(this.when).unix()
       let address = SpinnerContract.networks[this.network].address
       let spinner = new this.web3.eth.Contract(SpinnerContract.abi, address)
-      let method = spinner.methods.spin(time)
-      // let estimate = await method.estimateGas()
-      // console.log(estimate)
 
       let options = {
         from: this.web3.eth.defaultAccount,
@@ -31,20 +37,22 @@ export default {
       }
 
       try {
-        let tx = await method.send(options)
+        let tx = await spinner.methods.spin(time).send(options)
         console.log(tx)
+        this.$store.dispatch('registerThrows')
+        this.success = true
       }
       catch (err) {
         console.error(err)
-        this.error = err
+        this.error = 'Adding throw failed'
       }
 
       this.loading = false
-    }
+    },
   },
 
   computed: {
-    ...mapState(['web3', 'network'])
+    ...mapState(['web3', 'network', 'throws'])
   }
 }
 </script>
@@ -63,9 +71,26 @@ export default {
         <div class="field">
           <div class="control">
             <button class="button is-link" :class="{ 'is-loading': loading }">Add Throw</button>
+
+            <div v-if="error" class="notification is-danger" v-text="error"></div>
+            <div v-if="success" class="notification is-success">Throw added.</div>
           </div>
         </div>
       </form>
+
+      <hr />
+
+      <div class="columns">
+        <div class="column" v-for="toss in throws" :key="toss.id" >
+          <throw :event="toss" />
+        </div>
+      </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+  .notification {
+    margin-top: 1.5rem;
+  }
+</style>

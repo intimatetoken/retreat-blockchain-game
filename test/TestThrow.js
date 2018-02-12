@@ -69,6 +69,7 @@ contract('Throw', accounts => {
   it('can place a bet on heads', async () => {
     // Act.
     let txn = await flip.headEmUp({ from: header, value: web3.toWei(10) })
+    console.log(txn.logs)
 
     // Assert.
     let maker = mapper.toHeader(await flip.headers.call(0))
@@ -85,6 +86,7 @@ contract('Throw', accounts => {
   it('can match a bet with tails', async () => {
     // Act.
     let txn = await flip.illTakeYa(0, { from: tailer, value: web3.toWei(10) })
+    console.log(txn.logs)
 
     // Assert.
     let bet = mapper.toBet(await flip.bets.call(0))
