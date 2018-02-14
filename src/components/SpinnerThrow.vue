@@ -33,6 +33,7 @@ export default {
 
       try {
         let tx = await this.toss.methods.throwIt().send(options)
+        console.log(tx)
         this.success = true
       }
       catch (err) {

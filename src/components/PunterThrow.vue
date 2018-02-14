@@ -26,7 +26,11 @@ export default {
     relavitiveStart() {
       if (! this.time) return
 
-      return moment().isBefore(this.time) ? this.time.toNow() : this.time.fromNow()
+      let isPast = moment().isBefore(this.time)
+
+      return isPast ?
+        this.time.fromNow() : // ago
+        this.time.toNow() // in
     },
 
     timeStart() {
@@ -38,6 +42,10 @@ export default {
     headers() {
       let eths = _.range(0, 10, 0.001)
       console.log(eths)
+    },
+
+    image() {
+      return `/static/images/${this.status}.jpg`
     }
   },
 
@@ -50,9 +58,9 @@ export default {
 </script>
 
 <template>
-  <div class="timeline-item">
+  <div v-if="ready" class="timeline-item">
     <div class="timeline-marker is-image is-64x64">
-      <img src="http://bulma.io/images/placeholders/64x64.png">
+      <img :src="image">
     </div>
     <div class="timeline-content">
       <p class="heading">{{ relavitiveStart }} - {{ timeStart }}</p>

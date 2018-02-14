@@ -1,6 +1,8 @@
 module.exports = {
   toStatus (status) {
-    switch (status.toNumber()) {
+    status = status.toNumber ? status.toNumber() : parseInt(status)
+
+    switch (status) {
       case 0:
         return 'NotThrown'
 

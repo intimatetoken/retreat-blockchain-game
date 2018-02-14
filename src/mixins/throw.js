@@ -1,6 +1,7 @@
 import moment from 'moment'
 import { mapState } from 'vuex'
 
+import mapper from '../../test/helpers/mapper.js'
 import ThrowContract from '../../build/contracts/Throw.json'
 
 export default {
@@ -9,14 +10,24 @@ export default {
   data () {
     return {
       toss: null,
-      time: null
+      time: null,
+      status: null,
+      ready: false
     }
   },
 
   async created () {
     this.toss = new this.web3.eth.Contract(ThrowContract.abi, this.event.returnValues.where)
 
-    this.time = moment.unix(await this.toss.methods.throwTime().call())
+    let results = await Promise.all([
+      this.toss.methods.throwTime().call(),
+      this.toss.methods.status().call(),
+    ])
+
+    this.time = moment.unix(results[0])
+    this.status = mapper.toStatus(results[1])
+
+    this.ready = true
   },
 
   computed: {
