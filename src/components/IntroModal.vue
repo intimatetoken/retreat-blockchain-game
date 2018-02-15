@@ -17,7 +17,7 @@
       ...mapState([
         'web3',
         'network',
-        'accounts',
+        'address',
         'balance',
         'throws'
       ]),
@@ -29,7 +29,7 @@
       isGood () {
         let tests = [
           this.web3,
-          this.accounts,
+          this.address,
           this.networked,
           this.balance,
           this.throws
@@ -51,7 +51,7 @@
       <section class="modal-card-body">
         <div class="content">
           <status-item :status="web3" text="Web3 Injected Browser" instructions="Get a Web3 Enabled browser like MetaMask" />
-          <status-item :status="accounts" text="Wallet Unlocked" instructions="Unlock your wallet" />
+          <status-item :status="address" text="Wallet Unlocked" instructions="Unlock your wallet" />
           <status-item :status="networked" text="On the right network" instructions="Select the Ropsten network" />
           <status-item :status="balance" text="Got some eth for a bet" instructions="You're broke! Put some ETH in your wallet!" />
           <status-item :status="throws" text="Syncing with the blockchain" instructions="Eeep! Try and refresh." />

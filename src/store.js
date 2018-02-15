@@ -18,7 +18,7 @@ const store = new Vuex.Store({
   state: {
     web3: null,
     network: null,
-    accounts: null,
+    address: null,
     balance: null,
     throws: null
   },
@@ -32,8 +32,8 @@ const store = new Vuex.Store({
       state.network = network
     },
 
-    accounts(state, accounts) {
-      state.accounts = accounts
+    address(state, address) {
+      state.address = address
     },
 
     balance(state, balance) {
@@ -68,24 +68,23 @@ const store = new Vuex.Store({
       }
     },
 
-    async registerAccounts({ state, commit, dispatch }) {
+    async registerAddress({ state, commit, dispatch }) {
       try {
         let accounts = await state.web3.eth.getAccounts()
 
         if (! accounts || ! accounts.length) throw 'No accounts'
 
         state.web3.eth.defaultAccount = accounts[0]
-
-        commit('accounts', accounts)
+        commit('address', accounts[0])
       }
       catch (err) {
-        commit('accounts', false)
+        commit('address', false)
       }
     },
 
     async registerBalance({ state, commit, dispatch }) {
       try {
-        let balance = await state.web3.eth.getBalance(state.accounts[0])
+        let balance = await state.web3.eth.getBalance(state.address)
         commit('balance', balance)
       }
       catch (err) {

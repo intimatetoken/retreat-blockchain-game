@@ -7,6 +7,10 @@ import BetHeads from './BetHeads'
 import BetTails from './BetTails'
 import ClaimWinnings from './ClaimWinnings'
 
+let states = {
+  InTheAir: require('./BetStates/InTheAir').default,
+}
+
 export default {
   mixins: [toss],
 
@@ -14,37 +18,64 @@ export default {
     BetHeads,
     BetTails,
     ClaimWinnings,
-  },
-
-  data() {
-    return {
-      heads: null
-    }
+    ...states,
   },
 
   computed: {
     relavitiveStart() {
-      let isPast = moment().isBefore(this.time)
+      return this.isAfterThrowTime ?
+        this.data.time.fromNow() : // ago
+        this.data.time.toNow() // in
+    },
 
-      return isPast ?
-        this.time.fromNow() : // ago
-        this.time.toNow() // in
+    isAfterThrowTime() {
+      return moment().isAfter(this.data.time)
     },
 
     timeStart() {
-      return this.time.format('h:mma')
+      return this.data.time.format('h:mma')
     },
 
     image() {
-      return `/static/images/${this.status}.jpg`
+      return `/static/images/${this.data.status}.jpg`
+    },
+
+    // https://www.lucidchart.com/documents/edit/3ca0e9aa-84eb-4b82-bbf1-a7bf6d947b2c/0
+    component() {
+      let thrown = this.data.status === 'None'
+
+      if (! thrown && this.isAfterThrowTime) {
+        return 'InTheAir'
+      }
+
+      if (! thrown && ! this.isAfterThrowTime && ! hasBet) {
+        return 'BetForm'
+      }
+
+      if (! thrown && ! this.isAfterThrowTime && hasBet) {
+        return 'GoodLuck'
+      }
+
+      if (thrown && this.data.winnings > 0) {
+        return 'YouWon'
+      }
+
+      if (thrown && this.data.header > 0) {
+        return 'GiveMeMyMoney'
+      }
+
+      if (thrown && this.data.bet !== 'None') {
+        return 'BetterLuckNextTime'
+      }
+
+      if (thrown && this.data.bet === 'None') {
+        return 'NoBet'
+      }
+
+      throw Error('Invalid state')
     }
   },
 
-  methods: {
-    headEmUp() {
-
-    }
-  },
 }
 </script>
 
@@ -56,28 +87,7 @@ export default {
     <div class="timeline-content">
       <p class="heading">{{ relavitiveStart }} - {{ timeStart }}</p>
 
-      <div v-if="status == 'NotThrown'" class="columns">
-        <div class="column">
-          <bet-heads :toss="toss" />
-        </div>
-        <div class="is-divider-vertical" data-content="OR"></div>
-        <div class="column">
-          <bet-tails :toss="toss" />
-        </div>
-      </div>
-
-      <div v-else class="columns">
-        <div class="column">
-          <div class="field is-grouped">
-            <claim-winnings :toss="toss" />
-            <p class="control">
-              <a class="button is-small">
-                Claim Unmatched Bet
-              </a>
-            </p>
-          </div>
-        </div>
-      </div>
+      <component :is="component" />
 
     </div>
   </div>

@@ -14,9 +14,7 @@ export default {
 
   computed: {
     label() {
-      if (! this.time) return
-
-      return this.time.format('h:mma')
+      return this.data.time.format('h:mma')
     }
   },
 
@@ -48,7 +46,7 @@ export default {
 </script>
 
 <template>
-  <div class="card">
+  <div v-if="ready" class="card">
     <header class="card-header">
       <p class="card-header-title">
         {{ label }}

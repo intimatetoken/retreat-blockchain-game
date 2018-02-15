@@ -16,8 +16,8 @@ module.exports = {
 
   toBet (bet) {
     return {
-      header: bet[0],
-      tailer: bet[1],
+      heads: bet[0],
+      tails: bet[1],
       amount: bet[2]
     }
   },

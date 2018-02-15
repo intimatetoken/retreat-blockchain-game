@@ -65,8 +65,8 @@ contract('Throw', accounts => {
     // Assert.
     let bet = mapper.toBet(await flip.bets.call(0))
 
-    expect(bet.header).to.equal(header)
-    expect(bet.tailer).to.equal(tailer)
+    expect(bet.heads).to.equal(header)
+    expect(bet.tails).to.equal(tailer)
     expect(web3.fromWei(bet.amount)).to.be.bignumber.equal(10)
     expect(await util.getEthBalance(flip.address)).to.be.bignumber.equal(25)
     expect(await util.getEthBalance(tailer)).to.be.bignumber.lessThan(90)

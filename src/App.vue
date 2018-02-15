@@ -16,7 +16,7 @@ export default {
   async beforeCreate() {
     await this.$store.dispatch('registerWeb3')
     await this.$store.dispatch('registerNetwork')
-    await this.$store.dispatch('registerAccounts')
+    await this.$store.dispatch('registerAddress')
     await this.$store.dispatch('registerBalance')
     await this.$store.dispatch('registerThrows')
   },
