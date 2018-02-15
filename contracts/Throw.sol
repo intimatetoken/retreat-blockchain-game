@@ -105,7 +105,7 @@ contract Throw is Destructible {
     throwTime = _throwTime;
   }
 
-  function headEmUp() public payable notThrown beforeThrow noHeaders {
+  function headEmUp() public payable notThrown beforeThrow noHeaders noBets {
     headers[msg.sender] = msg.value;
     bets[msg.sender] = Status.Heads;
 
