@@ -40,15 +40,12 @@ export default {
 </script>
 
 <template>
-  <p class="control">
-    <a class="button is-small" :class="state" @click="claim">
-      Claim Winnings
-    </a>
-  </p>
+  <div>
+    <h1>YOU WON!</h1>
+    <p class="control">
+      <a class="button is-small" :class="state" @click="claim">
+        Claim Winnings
+      </a>
+    </p>
+  </div>
 </template>
-
-<style scoped>
-  .error .control .icon {
-    color: red;
-  }
-</style>

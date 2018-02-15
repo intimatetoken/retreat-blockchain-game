@@ -46,9 +46,8 @@ contract('Throw', accounts => {
     let txn = await flip.headEmUp({ from: header, value: web3.toWei(10) })
 
     // Assert.
-    let amount = await flip.headers.call(header)
-
-    expect(web3.fromWei(amount)).to.be.bignumber.equal(10)
+    expect(mapper.toStatus(await flip.bets.call(header))).to.equal('Heads')
+    expect(web3.fromWei(await flip.headers.call(header))).to.be.bignumber.equal(10)
     expect(await util.getEthBalance(flip.address)).to.be.bignumber.equal(10)
     expect(await util.getEthBalance(header)).to.be.bignumber.lessThan(90)
   })
@@ -63,10 +62,11 @@ contract('Throw', accounts => {
     let txn = await flip.illTakeYa(header, { from: tailer, value: web3.toWei(10) })
 
     // Assert.
-    let bet = mapper.toBet(await flip.bets.call(0))
+    let bet = mapper.toBet(await flip.book.call(0))
 
     expect(bet.heads).to.equal(header)
     expect(bet.tails).to.equal(tailer)
+    expect(mapper.toStatus(await flip.bets.call(tailer))).to.equal('Tails')
     expect(web3.fromWei(bet.amount)).to.be.bignumber.equal(10)
     expect(await util.getEthBalance(flip.address)).to.be.bignumber.equal(25)
     expect(await util.getEthBalance(tailer)).to.be.bignumber.lessThan(90)
@@ -85,14 +85,8 @@ contract('Throw', accounts => {
     winner = 'Heads' === result ? header : tailer
 
     expect(web3.fromWei(diff)).to.be.bignumber.equal(2) // 10% of 20 ETH
-    expect(web3.fromWei(await flip.balances.call(winner))).to.be.bignumber.equal(18)
+    expect(web3.fromWei(await flip.winnings.call(winner))).to.be.bignumber.equal(18)
     expect(await util.getEthBalance(flip.address)).to.be.bignumber.equal(23)
-  })
-
-  it('after throw has a valid status', async () => {
-    let validStates = ['Heads', 'Tails']
-    let status = mapper.toStatus(await flip.status.call())
-    expect(validStates.indexOf(status)).to.be.greaterThan(-1);
   })
 
   it('Winners can claim their winnings', async () => {

@@ -10,7 +10,7 @@ contract Throw is Destructible {
   event MatchedBet(address indexed header, address indexed tailer, uint value);
   event Thrown(Status status);
 
-  enum Status { NotThrown, Heads, Tails }
+  enum Status { None, Heads, Tails }
 
   struct Bet {
     address heads;
@@ -21,7 +21,7 @@ contract Throw is Destructible {
   /**
    * Holds an array of matched bets.
    */
-  Bet[] public bets;
+  Bet[] public book;
 
   /**
    * Minimum time for the throw to take place.
@@ -31,7 +31,7 @@ contract Throw is Destructible {
   /**
    * Holds current status of the throw
    */
-  Status public status = Status.NotThrown;
+  Status public status = Status.None;
 
   /**
    * Commission in percent to transfer to the owner.
@@ -42,7 +42,7 @@ contract Throw is Destructible {
   /**
    * Maps winnings
    */
-  mapping(address => uint) public balances;
+  mapping(address => uint) public winnings;
 
   /**
    * Maps addresses to open header bets. Bets are deleted
@@ -54,10 +54,10 @@ contract Throw is Destructible {
    * Maps addresses to open header bets. Bets are deleted
    * from this mapping when a bet is matched.
    */
-  mapping(address => uint) public tailers;
+  mapping(address => Status) public bets;
 
   modifier notThrown() {
-    require(status == Status.NotThrown);
+    require(status == Status.None);
     _;
   }
 
@@ -82,9 +82,9 @@ contract Throw is Destructible {
   }
 
   modifier noBets() {
-    for (uint i = 0; i < bets.length; ++i) {
-      require(bets[i].tails != msg.sender);
-      require(bets[i].heads != msg.sender);
+    for (uint i = 0; i < book.length; ++i) {
+      require(book[i].tails != msg.sender);
+      require(book[i].heads != msg.sender);
     }
 
     _;
@@ -107,23 +107,19 @@ contract Throw is Destructible {
 
   function headEmUp() public payable notThrown beforeThrow noHeaders {
     headers[msg.sender] = msg.value;
+    bets[msg.sender] = Status.Heads;
 
     HeaderBet(msg.sender, msg.value);
   }
 
-  // Fallback function makes a heads bet
-  function () external payable {
-    headEmUp();
-  }
-
   function illTakeYa(address header) public payable notThrown beforeThrow noHeaders equalBet(header) noBets {
-    bets.push(Bet({
+    book.push(Bet({
       heads: header,
       tails: msg.sender,
       amount: msg.value
     }));
 
-    tailers[msg.sender] = msg.value;
+    bets[msg.sender] = Status.Tails;
     delete headers[header];
 
     MatchedBet(header, msg.sender, msg.value);
@@ -138,17 +134,17 @@ contract Throw is Destructible {
 
     uint take = 0;
 
-    for (uint i = 0; i < bets.length; ++i) {
-      uint winnings = bets[i].amount.mul(2);
-      uint fee = commission.mul(winnings).div(100);
+    for (uint i = 0; i < book.length; ++i) {
+      uint _winnings = book[i].amount.mul(2);
+      uint fee = commission.mul(_winnings).div(100);
 
       take = take.add(fee);
-      winnings = winnings.sub(fee);
+      _winnings = _winnings.sub(fee);
 
       if (status == Status.Heads) {
-        balances[bets[i].heads] = winnings;
+        winnings[book[i].heads] = _winnings;
       } else {
-        balances[bets[i].tails] = winnings;
+        winnings[book[i].tails] = _winnings;
       }
     }
 
@@ -162,9 +158,9 @@ contract Throw is Destructible {
   }
 
   function claim() public {
-    uint amount = balances[msg.sender];
+    uint amount = winnings[msg.sender];
 
-    balances[msg.sender] = 0;
+    winnings[msg.sender] = 0;
 
     msg.sender.transfer(amount);
   }
@@ -181,6 +177,11 @@ contract Throw is Destructible {
     require(_commission > 0);
 
     commission = _commission;
+  }
+
+  // Fallback function makes a heads bet
+  function () external payable {
+    headEmUp();
   }
 
 }

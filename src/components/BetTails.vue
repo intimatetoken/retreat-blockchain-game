@@ -32,10 +32,8 @@ export default {
         gas: 4444444
       }
 
-      let idx = parseInt(this.header.returnValues.idx)
-
       try {
-        let tx = await this.toss.methods.illTakeYa(idx).send(options)
+        let tx = await this.toss.methods.illTakeYa(this.header.returnValues.from).send(options)
         console.log(tx)
         this.state = 'success'
       }

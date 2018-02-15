@@ -28,18 +28,19 @@ export default {
       time: this.toss.methods.throwTime().call(),
       status: this.toss.methods.status().call(),
       header: this.toss.methods.headers(this.address).call(),
-      // bet: this.toss.methods.bets(this.address).call(),
+      bet: this.toss.methods.bets(this.address).call(),
       winnings: this.toss.methods.winnings(this.address).call(),
     })
 
     data.time = moment.unix(data.time)
     data.status = mapper.toStatus(data.status)
+    data.bet = mapper.toStatus(data.bet)
 
     this.data = data
     this.ready = true
   },
 
   computed: {
-    ...mapState(['web3', 'network'])
+    ...mapState(['web3', 'network', 'address'])
   }
 }

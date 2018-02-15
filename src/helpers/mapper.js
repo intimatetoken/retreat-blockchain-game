@@ -4,7 +4,7 @@ module.exports = {
 
     switch (status) {
       case 0:
-        return 'NotThrown'
+        return 'None'
 
       case 1:
         return 'Heads'

@@ -1,3 +1,17 @@
+<script>
+import BetHeads from '../BetHeads'
+import BetTails from '../BetTails'
+
+export default {
+  props: ['toss'],
+
+  components: {
+    BetHeads,
+    BetTails,
+  },
+}
+</script>
+
 <template>
   <div class="columns">
     <div class="column">

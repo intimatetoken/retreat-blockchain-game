@@ -80,7 +80,7 @@ export default {
 
       <hr />
 
-      <div class="columns">
+      <div class="columns is-multiline">
         <div class="column" v-for="toss in throws" :key="toss.id" >
           <throw :event="toss" />
         </div>
