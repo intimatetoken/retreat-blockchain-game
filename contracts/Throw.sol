@@ -6,16 +6,11 @@ import 'zeppelin-solidity/contracts/math/SafeMath.sol';
 contract Throw is Destructible {
   using SafeMath for uint;
 
-  event HeaderBet(address indexed from, uint idx, uint value);
-  event MatchedBet(address indexed header, address indexed tailer, uint idx);
+  event HeaderBet(address indexed from, uint value);
+  event MatchedBet(address indexed header, address indexed tailer, uint value);
   event Thrown(Status status);
 
   enum Status { NotThrown, Heads, Tails }
-
-  struct Header {
-    address owner;
-    uint amount;
-  }
 
   struct Bet {
     address heads;
@@ -27,12 +22,6 @@ contract Throw is Destructible {
    * Holds an array of matched bets.
    */
   Bet[] public bets;
-
-  /**
-   * Holds an array of open header bets. Bets are deleted
-   * from this array when a bet is matched.
-   */
-  Header[] public headers;
 
   /**
    * Minimum time for the throw to take place.
@@ -55,6 +44,18 @@ contract Throw is Destructible {
    */
   mapping(address => uint) public balances;
 
+  /**
+   * Maps addresses to open header bets. Bets are deleted
+   * from this mapping when a bet is matched.
+   */
+  mapping(address => uint) public headers;
+
+  /**
+   * Maps addresses to open header bets. Bets are deleted
+   * from this mapping when a bet is matched.
+   */
+  mapping(address => uint) public tailers;
+
   modifier notThrown() {
     require(status == Status.NotThrown);
     _;
@@ -75,6 +76,25 @@ contract Throw is Destructible {
     _;
   }
 
+  modifier noHeaders() {
+    require(headers[msg.sender] == 0);
+    _;
+  }
+
+  modifier noBets() {
+    for (uint i = 0; i < bets.length; ++i) {
+      require(bets[i].tails != msg.sender);
+      require(bets[i].heads != msg.sender);
+    }
+
+    _;
+  }
+
+  modifier equalBet(address header) {
+    require(headers[header] == msg.value);
+    _;
+  }
+
   /*****
    * @dev Create the contract
    * @param _throwTime   uint When a throw will take place (timestamp)
@@ -85,13 +105,10 @@ contract Throw is Destructible {
     throwTime = _throwTime;
   }
 
-  function headEmUp() public payable notThrown beforeThrow {
-    headers.push(Header({
-      owner: msg.sender,
-      amount: msg.value
-    }));
+  function headEmUp() public payable notThrown beforeThrow noHeaders {
+    headers[msg.sender] = msg.value;
 
-    HeaderBet(msg.sender, headers.length - 1, msg.value);
+    HeaderBet(msg.sender, msg.value);
   }
 
   // Fallback function makes a heads bet
@@ -99,16 +116,17 @@ contract Throw is Destructible {
     headEmUp();
   }
 
-  function illTakeYa(uint idx) public payable notThrown beforeThrow {
+  function illTakeYa(address header) public payable notThrown beforeThrow noHeaders equalBet(header) noBets {
     bets.push(Bet({
-      heads: headers[idx].owner,
+      heads: header,
       tails: msg.sender,
       amount: msg.value
     }));
 
-    delete headers[idx];
+    tailers[msg.sender] = msg.value;
+    delete headers[header];
 
-    MatchedBet(headers[idx].owner, msg.sender, idx);
+    MatchedBet(header, msg.sender, msg.value);
   }
 
   function throwIt() public notThrown afterThrow {
@@ -147,6 +165,14 @@ contract Throw is Destructible {
     uint amount = balances[msg.sender];
 
     balances[msg.sender] = 0;
+
+    msg.sender.transfer(amount);
+  }
+
+  function giveMeMyMoneyBack() public {
+    uint amount = headers[msg.sender];
+
+    headers[msg.sender] = 0;
 
     msg.sender.transfer(amount);
   }
