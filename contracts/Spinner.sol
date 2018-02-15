@@ -7,7 +7,7 @@ contract Spinner is Ownable {
 
   event Tossed(address where, uint when);
 
-  function spin(uint when) public {
+  function spin(uint when) public onlyOwner {
     Throw toss = new Throw(when);
 
     toss.transferOwnership(msg.sender);

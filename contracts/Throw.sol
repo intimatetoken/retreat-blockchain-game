@@ -125,7 +125,7 @@ contract Throw is Destructible {
     MatchedBet(header, msg.sender, msg.value);
   }
 
-  function throwIt() public notThrown afterThrow {
+  function throwIt() public notThrown afterThrow onlyOwner {
     if (getRandom(10) % 2 == 1) {
       status = Status.Heads;
     } else {
