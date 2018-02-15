@@ -1,5 +1,5 @@
 const util = require('./helpers/util')
-const mapper = require('./helpers/mapper')
+const mapper = require('../src/helpers/mapper')
 const expectThrow = require('./helpers/expectThrow')
 
 const moment = require('moment')
@@ -30,7 +30,6 @@ function expectRevert (callback) {
     })
 }
 
-const MIN_BET_SIZE = ether(0.01)
 contract('Throw', accounts => {
   // contract instances
   let flip, blockHelper
@@ -57,14 +56,8 @@ contract('Throw', accounts => {
   it('should have been deployed', async () => {
     console.log(`Throw Deployed at ${flip.address}`)
     console.log('The current time is ', moment.unix(await blockHelper.getNow.call()).format("dddd, MMMM Do YYYY, h:mm:ss a"))
-    console.log('Coins will be tossed at ', moment.unix(await flip.getThrowTime.call()).format("dddd, MMMM Do YYYY, h:mm:ss a"))
+    console.log('Coins will be tossed at ', moment.unix(await flip.throwTime.call()).format("dddd, MMMM Do YYYY, h:mm:ss a"))
   });
-
-  // Validation
-  it('min one bet in order for a toss to be made', async () => {
-    expect(await flip.getBetsCount()).to.be.bignumber.equal(0)
-    expectRevert(flip.throwIt)
-  })
 
   it('can place a bet on heads', async () => {
     // Act.
@@ -97,12 +90,6 @@ contract('Throw', accounts => {
     expect(await util.getEthBalance(flip.address)).to.be.bignumber.equal(20)
     expect(await util.getEthBalance(tailer)).to.be.bignumber.lessThan(90)
   })
-
-  it('betCount should be 1', async () => {
-    let betCount = await flip.getBetsCount()
-    expect(betCount).to.be.bignumber.equal(1)
-  })
-
 
   it.skip('Cannot throw before throw time', async () => {})
 

@@ -6,9 +6,9 @@ import 'zeppelin-solidity/contracts/math/SafeMath.sol';
 contract Throw is Destructible {
   using SafeMath for uint;
 
-  event Log(string msg);
-  event HeaderBet(uint idx, uint value);
-  event MatchedBet(uint idx);
+  event HeaderBet(address indexed from, uint idx, uint value);
+  event MatchedBet(address indexed header, address indexed tailer, uint idx);
+  event Thrown(Status status);
 
   enum Status { NotThrown, Heads, Tails }
 
@@ -23,11 +23,36 @@ contract Throw is Destructible {
     uint amount;
   }
 
+  /**
+   * Holds an array of matched bets.
+   */
   Bet[] public bets;
+
+  /**
+   * Holds an array of open header bets. Bets are deleted
+   * from this array when a bet is matched.
+   */
   Header[] public headers;
+
+  /**
+   * Minimum time for the throw to take place.
+   */
   uint public throwTime;
+
+  /**
+   * Holds current status of the throw
+   */
   Status public status = Status.NotThrown;
+
+  /**
+   * Commission in percent to transfer to the owner.
+   * Can be set changed via setCommission
+   */
   uint public commission = 10;
+
+  /**
+   * Maps winnings
+   */
   mapping(address => uint) public balances;
 
   modifier notThrown() {
@@ -60,14 +85,13 @@ contract Throw is Destructible {
     throwTime = _throwTime;
   }
 
-  // TODO - Should return the uint idx of the HeaderBet
   function headEmUp() public payable notThrown beforeThrow {
     headers.push(Header({
       owner: msg.sender,
       amount: msg.value
     }));
 
-    HeaderBet(headers.length - 1, msg.value);
+    HeaderBet(msg.sender, headers.length - 1, msg.value);
   }
 
   // Fallback function makes a heads bet
@@ -84,7 +108,7 @@ contract Throw is Destructible {
 
     delete headers[idx];
 
-    MatchedBet(idx);
+    MatchedBet(headers[idx].owner, msg.sender, idx);
   }
 
   function throwIt() public notThrown afterThrow {
@@ -111,12 +135,9 @@ contract Throw is Destructible {
     }
 
     // Transfer
+    Thrown(status);
     owner.transfer(fee);
   }
-
-  // function getHeaders() returns (uint256[]) {
-  //     return idsForContract[_contractAddress];
-  // }
 
   function getRandom(uint max) internal constant returns (uint randomNumber) {
     return (uint(keccak256(block.blockhash(block.number - 1))) % max) + 1;
@@ -124,25 +145,16 @@ contract Throw is Destructible {
 
   function claim() public {
     uint amount = balances[msg.sender];
+
     balances[msg.sender] = 0;
+
     msg.sender.transfer(amount);
   }
 
-  function getHeadersCount() public constant returns (uint256) {
-    return headers.length;
-  }
-  function getThrowTime() public constant returns (uint) {
-    return throwTime;
-  }
-
-  function getBetsCount() public constant returns (uint256) {
-    return bets.length;
-  }
-
   function updateCommission(uint256 _commission) public notThrown {
-      require(_commission > 0);
+    require(_commission > 0);
 
-      commission = _commission;
+    commission = _commission;
   }
 
 }

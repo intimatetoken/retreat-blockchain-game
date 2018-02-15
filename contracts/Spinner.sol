@@ -5,13 +5,13 @@ import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 
 contract Spinner is Ownable {
 
-  event Tossed(address where);
+  event Tossed(address where, uint when);
 
-  function spin(uint throwTime) public {
-    Throw toss = new Throw(throwTime);
+  function spin(uint when) public {
+    Throw toss = new Throw(when);
 
     toss.transferOwnership(msg.sender);
 
-    Tossed(address(toss));
+    Tossed(address(toss), when);
   }
 }

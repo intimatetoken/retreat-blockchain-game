@@ -24,8 +24,6 @@ export default {
 
   computed: {
     relavitiveStart() {
-      if (! this.time) return
-
       let isPast = moment().isBefore(this.time)
 
       return isPast ?
@@ -34,14 +32,7 @@ export default {
     },
 
     timeStart() {
-      if (! this.time) return
-
       return this.time.format('h:mma')
-    },
-
-    headers() {
-      let eths = _.range(0, 10, 0.001)
-      console.log(eths)
     },
 
     image() {
@@ -65,7 +56,7 @@ export default {
     <div class="timeline-content">
       <p class="heading">{{ relavitiveStart }} - {{ timeStart }}</p>
 
-      <div class="columns">
+      <div v-if="status == 'NotThrown'" class="columns">
         <div class="column">
           <bet-heads :toss="toss" />
         </div>
@@ -73,7 +64,9 @@ export default {
         <div class="column">
           <bet-tails :toss="toss" />
         </div>
-        <div class="is-divider-vertical" data-content="OR"></div>
+      </div>
+
+      <div v-else class="columns">
         <div class="column">
           <div class="field is-grouped">
             <claim-winnings :toss="toss" />
@@ -86,7 +79,6 @@ export default {
         </div>
       </div>
 
-
     </div>
   </div>
 </template>
@@ -96,6 +88,11 @@ export default {
   @import "~bulma-divider";
 
   .timeline-item .timeline-content {
-    padding-left: 3em;
+    padding-left: 3rem;
+  }
+
+  .column {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
   }
 </style>

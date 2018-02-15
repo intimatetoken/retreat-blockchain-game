@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 import VuexPersist from 'vuex-persist'
 import { contentLoaded } from 'document-promises'
 import Web3 from 'web3'
+import _ from 'lodash'
 
 import SpinnerContract from '../build/contracts/Spinner.json'
 
@@ -12,12 +13,6 @@ import SpinnerContract from '../build/contracts/Spinner.json'
 // import mutations from './mutations'
 
 Vue.use(Vuex)
-
-const vuexLocalStorage = new VuexPersist({
-  key: 'vuex',
-  storage: window.localStorage,
-  reducer: state => ({ user: state.user })
-})
 
 const store = new Vuex.Store({
   state: {
@@ -107,6 +102,8 @@ const store = new Vuex.Store({
           fromBlock: 0,
           toBlock: 'latest'
         })
+
+        events = _.sortBy(events, event => event.returnValues.when)
 
         commit('throws', events)
 

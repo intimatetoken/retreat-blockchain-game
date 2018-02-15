@@ -7,7 +7,7 @@
     "mine": "truffle develop",
     "dev": "poi",
     "build": "poi build",
-    "test": "truffle test --network test",
+    "test": "truffle test",
     "watch": "poi watch"
   },
   "dependencies": {

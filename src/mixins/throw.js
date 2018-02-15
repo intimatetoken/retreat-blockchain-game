@@ -1,7 +1,7 @@
 import moment from 'moment'
 import { mapState } from 'vuex'
 
-import mapper from '../../test/helpers/mapper.js'
+import mapper from '../helpers/mapper.js'
 import ThrowContract from '../../build/contracts/Throw.json'
 
 export default {
