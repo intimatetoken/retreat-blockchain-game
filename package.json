@@ -19,6 +19,7 @@
     "lodash": "^4.17.5",
     "moment": "^2.20.1",
     "truffle-contract": "^3.0.2",
+    "truffle-hdwallet-provider": "^0.0.3",
     "vue": "^2.5.3",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1",

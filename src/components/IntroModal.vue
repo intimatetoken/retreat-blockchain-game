@@ -23,7 +23,7 @@
       ]),
 
       networked () {
-        return this.network === null ? null : this.network == process.env.NETWORK_ID
+        return this.network === null ? null : this.network >= process.env.MIN_NETWORK_ID
       },
 
       isGood () {
