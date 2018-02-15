@@ -1,7 +1,7 @@
 const ganache = require("ganache-cli")
 const HDWalletProvider = require("truffle-hdwallet-provider")
 
-let mnemonic = process.env.MNEMONIC || '***REMOVED***'
+let mnemonic = process.env.MNEMONIC || 'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat'
 let infuraAccessToken = process.env.INFURA_ACCESS_TOKEN || '4XhqRMwcHJht5IC0ImYe'
 
 module.exports = {
