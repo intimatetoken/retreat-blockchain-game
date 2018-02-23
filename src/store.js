@@ -94,7 +94,7 @@ const store = new Vuex.Store({
 
     async registerThrows({ state, commit, dispatch }) {
       try {
-        let address = SpinnerContract.networks[state.network].address
+        let address = process.env.SPINNER || SpinnerContract.networks[state.network].address
         let spinner = new state.web3.eth.Contract(SpinnerContract.abi, address)
 
         let events = await spinner.getPastEvents('Tossed', {
