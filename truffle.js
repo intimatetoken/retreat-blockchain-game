@@ -34,6 +34,13 @@ module.exports = {
       provider() {
         return new HDWalletProvider(mnemonic, `https://ropsten.infura.io/${infuraAccessToken}`)
       },
+    },
+    rinkeby:  {
+      network_id: 3,
+      gas: 4600000,
+      provider() {
+        return new HDWalletProvider(mnemonic, `https://rinkeby.infura.io/${infuraAccessToken}`)
+      },
     }
   }
 };
