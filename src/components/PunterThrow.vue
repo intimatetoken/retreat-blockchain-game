@@ -39,7 +39,7 @@ export default {
     },
 
     image() {
-      return `/static/images/${this.data.status}.jpg`
+      return `/images/${this.data.status}.jpg`
     },
 
     thrown() {
