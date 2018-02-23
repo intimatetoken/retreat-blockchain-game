@@ -28,7 +28,7 @@ export default {
       this.success = false
 
       let time = moment(this.when).unix()
-      let address = SpinnerContract.networks[this.network].address
+      let address = process.env.SPINNER || SpinnerContract.networks[this.network].address
       let spinner = new this.web3.eth.Contract(SpinnerContract.abi, address)
 
       let options = {
