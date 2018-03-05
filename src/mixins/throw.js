@@ -14,6 +14,8 @@ export default {
       timestamp: null,
       statusCode: null,
       betCode: null,
+      header: null,
+      winnings: null,
     }
   },
 
