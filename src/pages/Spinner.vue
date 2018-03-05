@@ -6,6 +6,7 @@ import { mapState } from 'vuex'
 import Throw from '../components/SpinnerThrow'
 import SpinnerContract from '../../build/contracts/Spinner.json'
 import HelperContract from '../../build/contracts/TestHelper.json'
+import websocket3 from '../providers/websocket3'
 
 export default {
   components: {
@@ -17,7 +18,17 @@ export default {
       when: moment().add(1, 'hour').format(moment.HTML5_FMT.DATETIME_LOCAL),
       loading: false,
       error: null,
-      success: false
+      success: false,
+      throws: [],
+    }
+  },
+
+  web3() {
+    return {
+      throws: {
+        contract: this.spinner,
+        event: 'Tossed'
+      }
     }
   },
 
@@ -38,8 +49,6 @@ export default {
 
       try {
         let tx = await spinner.methods.spin(time).send(options)
-        console.log(tx)
-        this.$store.dispatch('registerThrows')
         this.success = true
       }
       catch (err) {
@@ -52,7 +61,7 @@ export default {
   },
 
   computed: {
-    ...mapState(['web3', 'network', 'throws'])
+    ...mapState(['web3', 'network', 'spinner'])
   }
 }
 </script>

@@ -3,7 +3,7 @@ import BetHeads from '../BetHeads'
 import BetTails from '../BetTails'
 
 export default {
-  props: ['toss'],
+  props: ['tossRead', 'tossWrite'],
 
   components: {
     BetHeads,
@@ -15,11 +15,11 @@ export default {
 <template>
   <div class="columns">
     <div class="column">
-      <bet-heads :toss="toss" />
+      <bet-heads :tossWrite="tossWrite" />
     </div>
     <div class="is-divider-vertical" data-content="OR"></div>
     <div class="column">
-      <bet-tails :toss="toss" />
+      <bet-tails :tossWrite="tossWrite" :tossRead="tossRead" />
     </div>
   </div>
 </template>

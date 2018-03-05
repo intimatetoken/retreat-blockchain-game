@@ -7,6 +7,12 @@ import IntroModal from './components/IntroModal'
 
 export default {
 
+  data () {
+    return {
+      ready: false
+    }
+  },
+
   components: {
     IntroModal,
     HeaderTemplate,
@@ -18,7 +24,8 @@ export default {
     await this.$store.dispatch('registerNetwork')
     await this.$store.dispatch('registerAddress')
     await this.$store.dispatch('registerBalance')
-    await this.$store.dispatch('registerThrows')
+    await this.$store.dispatch('registerSpinner')
+    this.ready = true
   },
 }
 </script>
@@ -27,7 +34,7 @@ export default {
   <div id="app">
     <IntroModal />
     <HeaderTemplate />
-    <router-view></router-view>
+    <router-view v-if="ready"></router-view>
     <FooterTemplate />
   </div>
 </template>

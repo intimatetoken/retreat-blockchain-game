@@ -5,6 +5,7 @@ import { contentLoaded } from 'document-promises'
 import Web3 from 'web3'
 import _ from 'lodash'
 
+import websocket3 from './providers/websocket3'
 import SpinnerContract from '../build/contracts/Spinner.json'
 
 // import state from './state'
@@ -40,8 +41,8 @@ const store = new Vuex.Store({
       state.balance = balance
     },
 
-    throws(state, throws) {
-      state.throws = throws
+    spinner(state, spinner) {
+      state.spinner = spinner
     },
   },
 
@@ -92,30 +93,11 @@ const store = new Vuex.Store({
       }
     },
 
-    async registerThrows({ state, commit, dispatch }) {
-      try {
-        let address = process.env.SPINNER || SpinnerContract.networks[state.network].address
-        let spinner = new state.web3.eth.Contract(SpinnerContract.abi, address)
+    async registerSpinner({ state, commit, dispatch }) {
+      let address = process.env.SPINNER || SpinnerContract.networks[state.network].address
+      let spinner = new websocket3.eth.Contract(SpinnerContract.abi, address)
 
-        let events = await spinner.getPastEvents('Tossed', {
-          fromBlock: 0,
-          toBlock: 'latest'
-        })
-
-        events = _.sortBy(events, event => event.returnValues.when)
-
-        commit('throws', events)
-
-        // for (i=0; i<events.length; i++) {
-        //   var eventObj = events[i];
-        //   console.log('Address: ' + eventObj.returnValues._from);
-        //   console.log('Greeting: ' + web3.utils.hexToAscii(eventObj.returnValues._greeting));
-        // }
-      }
-      catch (err) {
-        console.error(err)
-        commit('throws', false)
-      }
+      commit('spinner', spinner)
     },
   },
 })

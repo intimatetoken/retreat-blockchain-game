@@ -1,5 +1,8 @@
 <script>
+import moment from 'moment'
+
 import toss from '../mixins/throw'
+import mapper from '../helpers/mapper.js'
 
 export default {
   mixins: [toss],
@@ -14,7 +17,7 @@ export default {
 
   computed: {
     label() {
-      return this.data.time.format('h:mma')
+      return moment.unix(this.timestamp).format('h:mma')
     }
   },
 
@@ -30,8 +33,7 @@ export default {
       }
 
       try {
-        let tx = await this.toss.methods.throwIt().send(options)
-        console.log(tx)
+        let tx = await this.tossWrite.methods.throwIt().send(options)
         this.success = true
       }
       catch (err) {
@@ -46,10 +48,10 @@ export default {
 </script>
 
 <template>
-  <div v-if="ready" class="card">
+  <div v-if="timestamp && statusCode" class="card">
     <header class="card-header">
       <p class="card-header-title">
-        {{ label }}
+        {{ label }} - {{ status }}
       </p>
     </header>
     <div class="card-content">

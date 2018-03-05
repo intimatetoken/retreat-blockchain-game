@@ -31,8 +31,7 @@
           this.web3,
           this.address,
           this.networked,
-          this.balance,
-          this.throws
+          this.balance
         ]
 
         return tests.every(item => item)
@@ -54,7 +53,6 @@
           <status-item :status="address" text="Wallet Unlocked" instructions="Unlock your wallet" />
           <status-item :status="networked" text="On the right network" instructions="Select the Ropsten network" />
           <status-item :status="balance" text="Got some eth for a bet" instructions="You're broke! Put some ETH in your wallet!" />
-          <status-item :status="throws" text="Syncing with the blockchain" instructions="Eeep! Try and refresh." />
         </div>
       </section>
       <footer class="modal-card-foot">

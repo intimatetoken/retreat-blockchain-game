@@ -13,7 +13,7 @@ module.exports = {
       gas: 4600000,
       test: true,
     },
-    'ganache-cli': {
+    cli: {
       host: "localhost",
       port: 8545,
       network_id: "*",

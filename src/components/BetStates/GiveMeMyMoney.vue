@@ -2,7 +2,7 @@
 import { mapState } from 'vuex'
 
 export default {
-  props: ['toss'],
+  props: ['tossWrite'],
 
   data() {
     return {
@@ -21,7 +21,7 @@ export default {
       }
 
       try {
-        let tx = await this.toss.methods.giveMeMyMoneyBack().send(options)
+        let tx = await this.tossWrite.methods.giveMeMyMoneyBack().send(options)
         console.log(tx)
         this.state = 'is-success'
       }

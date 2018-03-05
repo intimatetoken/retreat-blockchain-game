@@ -7,8 +7,23 @@
       Throw
     },
 
+    data() {
+      return {
+        throws: []
+      }
+    },
+
+    web3() {
+      return {
+        throws: {
+          contract: this.spinner,
+          event: 'Tossed'
+        }
+      }
+    },
+
     computed: {
-      ...mapState(['throws'])
+      ...mapState(['spinner'])
     }
   }
 </script>

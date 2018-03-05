@@ -2,7 +2,7 @@
 import { mapState } from 'vuex'
 
 export default {
-  props: ['toss'],
+  props: ['tossRead', 'tossWrite'],
 
   data() {
     return {
@@ -12,13 +12,13 @@ export default {
     }
   },
 
-  async created() {
-    let bets = await this.toss.getPastEvents('HeaderBet', {
-      fromBlock: 0,
-      toBlock: 'latest'
-    })
-
-    this.bets = bets
+  web3() {
+    return {
+      bets: {
+        contract: this.tossRead,
+        event: 'HeaderBet'
+      }
+    }
   },
 
   methods: {
@@ -33,8 +33,7 @@ export default {
       }
 
       try {
-        let tx = await this.toss.methods.illTakeYa(this.header.returnValues.from).send(options)
-        console.log(tx)
+        let tx = await this.tossWrite.methods.illTakeYa(this.header.returnValues.from).send(options)
         this.state = 'success'
       }
       catch (err) {

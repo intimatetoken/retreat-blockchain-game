@@ -3,44 +3,46 @@ import moment from 'moment'
 import { mapState } from 'vuex'
 
 import mapper from '../helpers/mapper.js'
+import websocket3 from '../providers/websocket3'
 import ThrowContract from '../../build/contracts/Throw.json'
 
 export default {
   props: ['event'],
 
-  data () {
+  data() {
     return {
-      toss: null,
-      data: {
-        time: null,
-        status: null,
-        bet: null,
-        winnings: null,
-      },
-      ready: false
+      timestamp: null,
+      statusCode: null,
+      betCode: null,
     }
   },
 
-  async created () {
-    this.toss = new this.web3.eth.Contract(ThrowContract.abi, this.event.returnValues.where)
+  web3() {
+    this.tossRead = new websocket3.eth.Contract(ThrowContract.abi, this.event.returnValues.where)
+    this.tossWrite = new this.web3.eth.Contract(ThrowContract.abi, this.event.returnValues.where)
 
-    let data = await Promise.props({
-      time: this.toss.methods.throwTime().call(),
-      status: this.toss.methods.status().call(),
-      header: this.toss.methods.headers(this.address).call(),
-      bet: this.toss.methods.bets(this.address).call(),
-      winnings: this.toss.methods.winnings(this.address).call(),
-    })
-
-    data.time = moment.unix(data.time)
-    data.status = mapper.toStatus(data.status)
-    data.bet = mapper.toStatus(data.bet)
-
-    this.data = data
-    this.ready = true
+    return {
+      timestamp: { contract: this.tossRead, method: 'throwTime' },
+      statusCode: { contract: this.tossRead, method: 'status' },
+      betCode: { contract: this.tossRead, method: 'bets', args: [this.address] },
+      header: { contract: this.tossRead, method: 'headers', args: [this.address] },
+      winnings: { contract: this.tossRead, method: 'winnings', args: [this.address] },
+    }
   },
 
   computed: {
-    ...mapState(['web3', 'network', 'address'])
+    ...mapState(['web3', 'address']),
+
+    status() {
+      return this.statusCode && mapper.toStatus(this.statusCode)
+    },
+
+    bet() {
+      return this.betCode && mapper.toStatus(this.betCode)
+    },
+
+    time() {
+      return this.timestamp && moment.unix(this.timestamp)
+    }
   }
 }
