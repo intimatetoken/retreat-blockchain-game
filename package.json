@@ -22,7 +22,7 @@
     "truffle-hdwallet-provider": "^0.0.3",
     "vue": "^2.5.3",
     "vue-router": "^3.0.1",
-    "vue-web3": "^1.1.1",
+    "vue-web3": "^1.1.2",
     "vuex": "^3.0.1",
     "vuex-persist": "^1.1.1",
     "web3": "^1.0.0-beta.29",

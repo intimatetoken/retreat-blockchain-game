@@ -8518,9 +8518,9 @@ vue-template-es2015-compiler@^1.6.0:
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/vue-template-es2015-compiler/-/vue-template-es2015-compiler-1.6.0.tgz#dc42697133302ce3017524356a6c61b7b69b4a18"
 
-vue-web3@^1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/vue-web3/-/vue-web3-1.1.1.tgz#202eff0299943757947a9e60c7873563931ec00c"
+vue-web3@^1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/vue-web3/-/vue-web3-1.1.2.tgz#152275548705b4f44e5e197bd857d5114309805e"
   dependencies:
     bluebird "^3.5.1"
     lodash "^4.17.5"
